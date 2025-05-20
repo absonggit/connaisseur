@@ -11,42 +11,40 @@ Connaisseur 确保 Kubernetes 集群中容器镜像的完整性和来源真实�
 要了解有关 Connaisseur 的更多信息，请访问[完整文档](https://sse-secure-systems.github.io/connaisseur/)。
 
 
-## Get started
+## 开始使用
 
-To get started, locally add the Connaisseur [Helm](https://helm.sh/) repository 
+首先，在本地添加 Connaisseur [Helm](https://helm.sh/) 存储库
 
 ```console
 helm repo add connaisseur https://sse-secure-systems.github.io/connaisseur/charts
 ```
 
-and install the Connaisseur Helm chart from there:
+然后安装 Connaisseur Helm chart：
 
 ```console
 helm install connaisseur connaisseur/connaisseur --atomic --create-namespace --namespace connaisseur
 ```
 
-The default configuration of Connaisseur holds the public root key for [Docker official images](https://docs.docker.com/docker-hub/official_images/), so running such an official Docker image like the `hello-world` should succeed
+Connaisseur 的默认配置包含 Docker 官方镜像的公共根密钥，因此运行像 `hello-world` 这样的官方 Docker 镜像应该会成功
 
 ```console
 kubectl run hello-world --image=docker.io/hello-world
 ```
 
-as Connaisseur will successfully validate the signature of the `hello-world` image against the pre-configured public key, while running an image without any signature
+因为 Connaisseur 将成功验证 `hello-world` 图像与预配置公钥的签名，同时运行没有任何签名的图像
 
 ```
 kubectl run unsigned --image=docker.io/securesystemsengineering/testimage:unsigned
 ```
-or running an image with a signature not matching (one of) the pinned root keys
+或者运行签名与固定根密钥不匹配的图像将会失败。
 
 ```
 kubectl run foreignsignature --image=bitnami/postgresql
 ```
 
-will fail.
+##讨论、支持和反馈
+我们希望以社区需求为导向，推动 Connaisseur 的开发，期待您的反馈，如果您需要支持，我们很乐意为您提供帮助！欢迎通过 [GitHub 讨论区](https://github.com/sse-secure-systems/connaisseur/discussions) 与我们联系。
 
-## Discussions, support & feedback
-We hope to steer development of Connaisseur from demand of the community, are excited about your feedback and happy to help if you need support! So feel free to connect with us via [GitHub Discussions](https://github.com/sse-secure-systems/connaisseur/discussions).
+## 联系
 
-## Contact
-
-You can reach us via email under [connaisseur@securesystems.dev](mailto:connaisseur@securesystems.dev).
+您可以通过电子邮件 [connaisseur@securesystems.dev](mailto:connaisseur@securesystems.dev) 联系我们。
