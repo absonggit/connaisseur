@@ -1,14 +1,14 @@
-## CONNAISSEUR - Verify Container Image Signatures in Kubernetes
+## CONNAISSEUR - 验证 Kubernetes 中的容器镜像签名
 
-An admission controller for Kubernetes integrating container image signature verification and trust pinning into a cluster to ensure that only valid images are being deployed - simple, flexible, secure.
+Kubernetes 的准入控制器将容器镜像签名验证和信任固定集成到集群中，以确保仅部署有效的镜像 - 简单、灵活、安全。
 
-## What is Connaisseur?
+## Connaisseur 是什么？
 
-Connaisseur ensures integrity and provenance of container images in a Kubernetes cluster.
-To do so, it intercepts resource creation or update requests sent to the Kubernetes cluster, identifies all container images and verifies their signatures against pre-configured public keys.
-Based on the result, it either accepts or denies those requests.
+Connaisseur 确保 Kubernetes 集群中容器镜像的完整性和来源真实性。
+为此，它会拦截发送到 Kubernetes 集群的资源创建或更新请求，识别所有容器镜像，并根据预先配置的公钥验证其签名。
+根据验证结果，它会接受或拒绝这些请求。
 
-To learn more about Connaisseur, visit the [full documentation](https://sse-secure-systems.github.io/connaisseur/).
+要了解有关 Connaisseur 的更多信息，请访问[完整文档](https://sse-secure-systems.github.io/connaisseur/)。
 
 
 ## Get started
