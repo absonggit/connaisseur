@@ -1,0 +1,27 @@
+questions:
+- variable: application.logLevel
+  label: "日志级别"
+  description: "设置 Connaisseur 的日志详细程度"
+  required: true
+  type: enum
+  options:
+    - info
+    - warning
+    - debug
+    - error
+
+- variable: application.logFormat
+  label: "日志格式"
+  description: "日志输出格式"
+  required: true
+  type: enum
+  options:
+    - json-pretty
+    - plain
+
+- variable: application.features.automaticChildApproval
+  label: "自动批准子资源"
+  description: "是否自动批准子资源"
+  required: true
+  type: boolean
+
