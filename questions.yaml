@@ -41,42 +41,7 @@ questions:
   # ---- 策略规则与校验器总配置（合并成一个文本框） ----
   - variable: applicationConfigFull
     label: "核心配置（校验器与策略规则, YAML，建议直接按默认模板修改）"
-    description: |
-      填写格式为完整YAML，涵盖 validators 和 policy 两项。如下示例：
-      ---
-      validators:
-        - name: allow
-          type: static
-          approve: true
-        - name: deny
-          type: static
-          approve: false
-        - name: dockerhub
-          type: notaryv1
-          trustRoots:
-            - name: default
-              key: |
-                -----BEGIN PUBLIC KEY-----
-                MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEOXYta5TgdCwXTCnLU09W5T4M4r9f
-                QQrqJuADP6U7g5r9ICgPSmZuRHP/1AYUfOQW3baveKsT969EfELKj1lfCA==
-                -----END PUBLIC KEY-----
-            - name: sse
-              key: |
-                -----BEGIN PUBLIC KEY-----
-                MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEsx28WV7BsQfnHF1kZmpdCTTLJaWe
-                d0CA+JOi8H4REuBaWSZ5zPDe468WuOJ6f71E7WFg3CVEVYHuoZt2UYbN/Q==
-                -----END PUBLIC KEY-----
-      policy:
-        - pattern: "*:*"
-          validator: deny
-        - pattern: "docker.io/library/*:*"
-          validator: dockerhub
-        - pattern: "docker.io/securesystemsengineering/*:*"
-          validator: dockerhub
-          with:
-            trustRoot: sse
-        - pattern: "registry.k8s.io/*:*"
-          validator: allow
+    description: 填写格式为完整YAML
     type: multiline
     required: true
     default: |-
