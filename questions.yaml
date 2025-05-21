@@ -19,7 +19,6 @@ questions:
     default: json-pretty
     options:
       - json-pretty
-      - json
       - plain
     group: "日志配置"
 
@@ -79,19 +78,47 @@ questions:
   - variable: application.policy
     label: "镜像策略规则"
     description: |
-      镜像策略规则，通过 YAML 数组编辑，可根据业务需要调整。
-      例:
-        - pattern: "*:*"
-          validator: deny
-        - pattern: "docker.io/library/*:*"
-          validator: dockerhub
+      镜像策略规则，按 YAML 数组格式编辑，示例已提供。每条规则 pattern 支持通配。
     type: multiline
+    default: |-
+      - pattern: "*:*"
+        validator: deny
+      - pattern: "docker.io/library/*:*"
+        validator: dockerhub
+      - pattern: "docker.io/securesystemsengineering/*:*"
+        validator: dockerhub
+        with:
+          trustRoot: sse
+      - pattern: "registry.k8s.io/*:*"
+        validator: allow
     group: "策略规则"
 
   # 校验器
   - variable: application.validators
     label: "校验器设置"
     description: |
-      校验器配置，支持 NotaryV1、Cosign 等。复杂结构建议 YAML 编辑。
+      支持 NotaryV1、Cosign 等校验方式，按 YAML 格式配置。示例为默认推荐配置。
     type: multiline
+    default: |-
+      - name: allow
+        type: static
+        approve: true
+      - name: deny
+        type: static
+        approve: false
+      - name: dockerhub
+        type: notaryv1
+        trustRoots:
+          - name: default
+            key: |
+              -----BEGIN PUBLIC KEY-----
+              MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEOXYta5TgdCwXTCnLU09W5T4M4r9f
+              QQrqJuADP6U7g5r9ICgPSmZuRHP/1AYUfOQW3baveKsT969EfELKj1lfCA==
+              -----END PUBLIC KEY-----
+          - name: sse
+            key: |
+              -----BEGIN PUBLIC KEY-----
+              MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEsx28WV7BsQfnHF1kZmpdCTTLJaWe
+              d0CA+JOi8H4REuBaWSZ5zPDe468WuOJ6f71E7WFg3CVEVYHuoZt2UYbN/Q==
+              -----END PUBLIC KEY-----
     group: "校验器"
