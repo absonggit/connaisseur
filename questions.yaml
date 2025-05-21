@@ -25,3 +25,18 @@ questions:
   required: true
   type: boolean
 
+- variable: application.features.cache.expirySeconds
+  label: "镜像签名校验缓存超时时间（秒）"
+  description: "缓存校验结果的分钟数，减少重复验证。通常推荐 30-300 秒。"
+  type: int
+  required: true
+  default: 30
+  group: "缓存设置"
+
+- variable: application.features.cache.cacheErrors
+  label: "是否缓存校验失败"
+  description: "勾选后，镜像校验失败的结果也会被缓存，有助于减少无用流量。"
+  type: boolean
+  required: true
+  default: true
+  group: "缓存设置"
