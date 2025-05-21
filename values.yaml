@@ -136,17 +136,12 @@ application:
 
   # policy options: https://sse-secure-systems.github.io/connaisseur/latest/basics/#configuration-options_2
   # explanation of policy patterns: https://sse-secure-systems.github.io/connaisseur/latest/basics/#image-policy
-  policy:
-    - pattern: "*:*"
-      validator: deny
-    - pattern: "docker.io/library/*:*"
-      validator: dockerhub
-    - pattern: "docker.io/securesystemsengineering/*:*"
-      validator: dockerhub
-      with:
-        trustRoot: sse
-    - pattern: "registry.k8s.io/*:*"
-      validator: allow
+{{- $policy := .Values.application.policy | fromYaml -}}
+...
+{{- range $policy }}
+  # 这里 $policy 是数组，可用 .pattern .validator 访问
+...
+{{- end }}
 
   # feature descriptions: https://sse-secure-systems.github.io/connaisseur/latest/features/
   features:
