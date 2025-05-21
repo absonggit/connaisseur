@@ -1,9 +1,4 @@
 questions:
-  - variable: "whatever"
-    type: label
-    label: |
-      ### 说明
-      以下配置可以保持默认值，点击`编辑YAML`来增删改策略和验证器
   - variable: application.logLevel
     label: "日志级别"
     description: "日志详细程度（info/warning/debug/error）"
