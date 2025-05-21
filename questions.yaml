@@ -1,5 +1,4 @@
 questions:
-  # ---- 日志配置 ----
   - variable: application.logLevel
     label: "日志级别"
     description: "日志详细程度（info/warning/debug/error）"
@@ -10,7 +9,7 @@ questions:
       - debug
       - error
     default: info
-    group: "基础配置"
+    group: "日志配置"
 
   - variable: application.logFormat
     label: "日志格式"
@@ -21,9 +20,8 @@ questions:
       - json
       - plain
     default: json-pretty
-    group: "基础配置"
+    group: "日志配置"
 
-  # ---- 功能特性举例（可继续补充） ----
   - variable: application.features.automaticUnchangedApproval
     label: "自动批准未变更镜像"
     description: "若镜像引用未发生变更则自动通过"
@@ -33,49 +31,48 @@ questions:
 
   - variable: application.features.automaticChildApproval
     label: "自动批准子资源"
-    description: "如由父资源触发的 pod"
+    description: "如由父资源创建的 Pod/Job 等"
     type: boolean
     default: true
     group: "功能特性"
 
-  # ---- 策略规则与校验器总配置（合并成一个文本框） ----
-  - variable: applicationConfigFull
-    label: "核心配置（校验器与策略规则, YAML，建议直接按默认模板修改）"
-    description: 填写格式为完整YAML
-    type: multiline
-    required: true
-    default: |-
-      validators:
-        - name: allow
-          type: static
-          approve: true
-        - name: deny
-          type: static
-          approve: false
-        - name: dockerhub
-          type: notaryv1
-          trustRoots:
-            - name: default
-              key: |
-                -----BEGIN PUBLIC KEY-----
-                MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEOXYta5TgdCwXTCnLU09W5T4M4r9f
-                QQrqJuADP6U7g5r9ICgPSmZuRHP/1AYUfOQW3baveKsT969EfELKj1lfCA==
-                -----END PUBLIC KEY-----
-            - name: sse
-              key: |
-                -----BEGIN PUBLIC KEY-----
-                MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEsx28WV7BsQfnHF1kZmpdCTTLJaWe
-                d0CA+JOi8H4REuBaWSZ5zPDe468WuOJ6f71E7WFg3CVEVYHuoZt2UYbN/Q==
-                -----END PUBLIC KEY-----
-      policy:
-        - pattern: "*:*"
-          validator: deny
-        - pattern: "docker.io/library/*:*"
-          validator: dockerhub
-        - pattern: "docker.io/securesystemsengineering/*:*"
-          validator: dockerhub
-          with:
-            trustRoot: sse
-        - pattern: "registry.k8s.io/*:*"
-          validator: allow
-    group: "核心策略"
+  - variable: application.features.detectionMode
+    label: "只警告不拒绝"
+    description: "开启后校验失败只输出警告但不拒绝"
+    type: boolean
+    default: false
+    group: "功能特性"
+
+  - variable: application.features.namespacedValidation.mode
+    label: "命名空间校验模式"
+    description: "ignore=忽略所有命名空间注解，validate=仅校验有注解命名空间"
+    type: enum
+    options:
+      - ignore
+      - validate
+    default: ignore
+    group: "功能特性"
+
+  - variable: application.features.resourceValidationMode
+    label: "资源校验范围"
+    description: "校验全部类型(all)或仅Pod(podsOnly)"
+    type: enum
+    options:
+      - all
+      - podsOnly
+    default: all
+    group: "功能特性"
+
+  - variable: application.features.cache.expirySeconds
+    label: "签名校验缓存时长(秒)"
+    description: "校验缓存的有效秒数"
+    type: int
+    default: 30
+    group: "功能特性"
+
+  - variable: application.features.cache.cacheErrors
+    label: "缓存校验失败"
+    description: "是否对失败的校验结果也进行缓存"
+    type: boolean
+    default: true
+    group: "功能特性"
