@@ -76,7 +76,7 @@ questions:
     type: boolean
     default: true
     group: "功能特性"
-questions:
+    
   - variable: application.validators
     label: "校验器（validators）"
     description: |
