@@ -76,3 +76,91 @@ questions:
     type: boolean
     default: true
     group: "功能特性"
+questions:
+  - variable: application.validators
+    label: "校验器（validators）"
+    description: |
+      以 YAML 数组格式填写，可根据需要新增或删除校验器条目。
+      ➤ 新增：复制下面的一个示例条目粘贴到下方，修改 name、type 等内容即可。
+      ➤ 删除：直接删除相关条即可。
+
+      示例（可参考编辑）：
+        - name: allow
+          type: static
+          approve: true
+        - name: deny
+          type: static
+          approve: false
+        - name: dockerhub
+          type: notaryv1
+          trustRoots:
+            - name: default
+              key: |
+                -----BEGIN PUBLIC KEY-----
+                MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEOXYta5TgdCwXTCnLU09W5T4M4r9f
+                QQrqJuADP6U7g5r9ICgPSmZuRHP/1AYUfOQW3baveKsT969EfELKj1lfCA==
+                -----END PUBLIC KEY-----
+            - name: sse
+              key: |
+                -----BEGIN PUBLIC KEY-----
+                MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEsx28WV7BsQfnHF1kZmpdCTTLJaWe
+                d0CA+JOi8H4REuBaWSZ5zPDe468WuOJ6f71E7WFg3CVEVYHuoZt2UYbN/Q==
+                -----END PUBLIC KEY-----
+    type: multiline
+    required: true
+    group: "校验器"
+    default: |-
+      - name: allow
+        type: static
+        approve: true
+      - name: deny
+        type: static
+        approve: false
+      - name: dockerhub
+        type: notaryv1
+        trustRoots:
+          - name: default
+            key: |
+              -----BEGIN PUBLIC KEY-----
+              MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEOXYta5TgdCwXTCnLU09W5T4M4r9f
+              QQrqJuADP6U7g5r9ICgPSmZuRHP/1AYUfOQW3baveKsT969EfELKj1lfCA==
+              -----END PUBLIC KEY-----
+          - name: sse
+            key: |
+              -----BEGIN PUBLIC KEY-----
+              MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEsx28WV7BsQfnHF1kZmpdCTTLJaWe
+              d0CA+JOi8H4REuBaWSZ5zPDe468WuOJ6f71E7WFg3CVEVYHuoZt2UYbN/Q==
+              -----END PUBLIC KEY-----
+
+  - variable: application.policy
+    label: "策略规则（policy）"
+    description: |
+      以 YAML 数组格式编辑。可任意新增或删除策略条目。
+      ➤ 新增规则时，复制上一条 pattern，补充、修改后即可。
+      ➤ 删除无用规则直接删掉相关条。
+
+      示例（可参考编辑）：
+        - pattern: "*:*"
+          validator: deny
+        - pattern: "docker.io/library/*:*"
+          validator: dockerhub
+        - pattern: "docker.io/securesystemsengineering/*:*"
+          validator: dockerhub
+          with:
+            trustRoot: sse
+        - pattern: "registry.k8s.io/*:*"
+          validator: allow
+    type: multiline
+    required: true
+    group: "策略规则"
+    default: |-
+      - pattern: "*:*"
+        validator: deny
+      - pattern: "docker.io/library/*:*"
+        validator: dockerhub
+      - pattern: "docker.io/securesystemsengineering/*:*"
+        validator: dockerhub
+        with:
+          trustRoot: sse
+      - pattern: "registry.k8s.io/*:*"
+        validator: allow
