@@ -79,12 +79,14 @@ questions:
     
 
   - variable: application.policy
-    label: "策略规则"
+    label: "规则"
     description: "以 YAML 数组格式填写"
     type: multiline
-    group: "策略规则"
+    default: "策略"
+    group: "策略"
   - variable: application.validators
     label: "验证器"
     description: "以 YAML 数组格式填写"
     type: multiline
-    group: "验证器"
+    default: "验证器"
+    group: "策略"
