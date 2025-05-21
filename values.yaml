@@ -1,185 +1,199 @@
-questions:
-  # 日志配置
-  - variable: application.logLevel
-    label: "日志级别"
-    description: |
-      日志详细程度
-    type: enum
-    options:
-      - info
-      - warning
-      - debug
-      - error
-    default: info
-    group: "基础配置"
+kubernetes:
+  # changes to connaisseur deployment file
+  deployment:
+    image:
+      repository: docker.io/securesystemsengineering/connaisseur
+      # Running a different version than the version in the Chart.yaml may not work as the
+      # Connaisseur application version depends on the layout of the Helm deployment
+      # Thus, if unset, we default to the appVersion of the Chart.yaml
+      # tag: v1.2.3
+    pullPolicy: IfNotPresent
+    replicasCount: 3
+    imagePullSecrets: []
+    nodeSelector: {}
+    tolerations: []
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      privileged: false
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 10001 # remove when using openshift or OKD 4
+      runAsGroup: 20001 # remove when using openshift or OKD 4
+      seccompProfile: # remove when using Kubernetes prior v1.19, openshift or OKD 4
+        type: RuntimeDefault # remove when using Kubernetes prior v1.19, openshift or OKD 4
+    podSecurityContext: {}
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/instance
+                    operator: In
+                    values:
+                      - connaisseur
+              topologyKey: kubernetes.io/hostname
+            weight: 100
+    tls: {} # set to use custom tls certificates for webhook (key and cert fields)
+    envs: {} # set to use custom environment variables for connaisseur
+    podLabels: {} # additional labels to attach to the pods created
+    annotations: {} # additional annotations to attach to the deployment
+  # -----------------------------------------------------
 
-  - variable: application.logFormat
-    label: "日志格式"
-    description: |
-      日志输出格式，可选 json-pretty、json、plain
-    type: enum
-    options:
-      - json-pretty
-      - json
-      - plain
-    default: json-pretty
-    group: "基础配置"
+  # changes to connaisseur service
+  service:
+    type: ClusterIP
+    port: 443
+  # -----------------------------------------------------
 
-  # 功能特性
-  - variable: application.features.automaticUnchangedApproval
-    label: "自动批准未变更镜像"
-    description: |
-      镜像未变时自动通过
-    type: boolean
-    default: false
-    group: "功能特性"
+  # changes to connaisseur service account
+  serviceaccount: {}
+  #   annotations:
+  #     eks.amazonaws.com/role-arn: arn:aws:iam::XXX:role/myrole
 
-  - variable: application.features.automaticChildApproval
-    label: "自动批准子资源"
-    description: |
-      例：Deployment 自动创建的 Pod
-    type: boolean
-    default: true
-    group: "功能特性"
+  # -----------------------------------------------------
 
-  - variable: application.features.detectionMode
-    label: "只警告不拒绝"
-    description: |
-      如开启，所有校验失败仅产生警告，不拒绝
-    type: boolean
-    default: false
-    group: "功能特性"
+  # changes to connaisseur admission controller
+  webhook:
+    failurePolicy: Fail
+    reinvocationPolicy: Never
+  # -----------------------------------------------------
 
-  - variable: application.features.namespacedValidation.mode
-    label: "命名空间校验模式"
-    description: |
-      只在指定命名空间或全部命名空间校验，ignore=全部放行
-    type: enum
-    options:
-      - ignore
-      - validate
-    default: ignore
-    group: "功能特性"
+  # changes to redis key-value store
+  redis:
+    image:
+      repository: redis
+      tag: 7
+    pullPolicy: Always
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      privileged: false
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 999 # redis user id; remove when using openshift or OKD 4
+      runAsGroup: 999 # redis group id; remove when using openshift or OKD 4
+      seccompProfile: # remove when using Kubernetes prior v1.19, openshift or OKD 4
+        type: RuntimeDefault # remove when using Kubernetes prior v1.19, openshift or OKD 4
+    podSecurityContext: {}
+    tls: {} # set to use custom tls certificates for redis
+  # -----------------------------------------------------
 
-  - variable: application.features.resourceValidationMode
-    label: "资源校验范围"
-    description: |
-      选择校验所有资源还是仅校验Pod（all/podsOnly）
-    type: enum
-    options:
-      - all
-      - podsOnly
-    default: all
-    group: "功能特性"
+  # additional labels for connaisseur resources
+  # (except for pods – see kubernetes.deployment.podLabels for that)
+  additionalLabels: {}
 
-  - variable: application.features.cache.expirySeconds
-    label: "签名校验缓存时长(秒)"
-    description: |
-      签名校验结果最大缓存时间（秒）
-    type: int
-    default: 30
-    group: "功能特性"
+  # activate pod disruption budget
+  # can set `minAvailable` and `maxUnavailable` values
+  podDisruptionBudget: {}
 
-  - variable: application.features.cache.cacheErrors
-    label: "缓存校验失败"
-    description: |
-      签名校验失败结果是否也缓存
-    type: boolean
-    default: true
-    group: "功能特性"
+# -----------------------------------------------------
 
-  # 策略规则
-  - variable: application.policy
-    label: "策略规则"
-    description: |
-      按 YAML 数组格式填写。
-      每项格式：
-        - pattern: 镜像匹配模式，通配符支持，如 *:*；
-        - validator: 对应下方校验器名称；
-        - with: (可选) 校验可选参数。如 trustRoot 指定信任根。
-      示例（可直接编辑）：
+# changes to connaisseur application logic
+application:
+  # validator options: https://sse-secure-systems.github.io/connaisseur/latest/validators/
+  validators:
+    - name: allow
+      type: static
+      approve: true
+    - name: deny
+      type: static
+      approve: false
+    - name: dockerhub
+      type: notaryv1
+      trustRoots:
+        - name: default # root from dockerhub
+          key: |
+            -----BEGIN PUBLIC KEY-----
+            MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEOXYta5TgdCwXTCnLU09W5T4M4r9f
+            QQrqJuADP6U7g5r9ICgPSmZuRHP/1AYUfOQW3baveKsT969EfELKj1lfCA==
+            -----END PUBLIC KEY-----
+        - name: sse # root from sse
+          key: |
+            -----BEGIN PUBLIC KEY-----
+            MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEsx28WV7BsQfnHF1kZmpdCTTLJaWe
+            d0CA+JOi8H4REuBaWSZ5zPDe468WuOJ6f71E7WFg3CVEVYHuoZt2UYbN/Q==
+            -----END PUBLIC KEY-----
 
-      - pattern: "*:*"
-        validator: deny
-      - pattern: "docker.io/library/*:*"
-        validator: dockerhub
-      - pattern: "docker.io/securesystemsengineering/*:*"
-        validator: dockerhub
-        with:
-          trustRoot: sse
-      - pattern: "registry.k8s.io/*:*"
-        validator: allow
+  # policy options: https://sse-secure-systems.github.io/connaisseur/latest/basics/#configuration-options_2
+  # explanation of policy patterns: https://sse-secure-systems.github.io/connaisseur/latest/basics/#image-policy
+  policy:
+    - pattern: "*:*"
+      validator: deny
+    - pattern: "docker.io/library/*:*"
+      validator: dockerhub
+    - pattern: "docker.io/securesystemsengineering/*:*"
+      validator: dockerhub
+      with:
+        trustRoot: sse
+    - pattern: "registry.k8s.io/*:*"
+      validator: allow
 
-    type: multiline
-    default: |-
-      - pattern: "*:*"
-        validator: deny
-      - pattern: "docker.io/library/*:*"
-        validator: dockerhub
-      - pattern: "docker.io/securesystemsengineering/*:*"
-        validator: dockerhub
-        with:
-          trustRoot: sse
-      - pattern: "registry.k8s.io/*:*"
-        validator: allow
-    required: true
-    group: "策略规则"
+  # feature descriptions: https://sse-secure-systems.github.io/connaisseur/latest/features/
+  features:
+    # automatic approval of resources that are updated, without changing the image reference
+    automaticUnchangedApproval: false
+    # automatic approval of child resources (e.g. pod created from a deployment)
+    automaticChildApproval: true
+    # mode to never deny any resources, only warn should any errors occur during validation
+    detectionMode: false
+    # ignore or validate only in specific namespaces, according to namespace annotations
+    namespacedValidation:
+      mode: ignore # 'ignore' or 'validate'
+    # validate all resources or only pods (and warn on others)
+    resourceValidationMode: "all" # 'all' or 'podsOnly'
+    cache:
+      expirySeconds: 30
+      cacheErrors: true
 
-  # 校验器
-  - variable: application.validators
-    label: "校验器"
-    description: |
-      按 YAML 数组格式填写。
-      每项格式：
-        - name: 校验器名称（与策略规则 validator 字段一致）；
-        - type: 校验类型（如 static/notaryv1）；
-        - approve: 是否自动通过（static类型才有）；
-        - trustRoots: (可选) 支持Notaryv1等类型的公钥数组，每项包含 name、key。
-      示例（可直接编辑）：
-
-      - name: allow
-        type: static
-        approve: true
-      - name: deny
-        type: static
-        approve: false
-      - name: dockerhub
-        type: notaryv1
-        trustRoots:
-          - name: default
-            key: |
-              -----BEGIN PUBLIC KEY-----
-              MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEOXYta5TgdCwXTCnLU09W5T4M4r9f
-              QQrqJuADP6U7g5r9ICgPSmZuRHP/1AYUfOQW3baveKsT969EfELKj1lfCA==
-              -----END PUBLIC KEY-----
-          - name: sse
-            key: |
-              -----BEGIN PUBLIC KEY-----
-              MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEsx28WV7BsQfnHF1kZmpdCTTLJaWe
-              d0CA+JOi8H4REuBaWSZ5zPDe468WuOJ6f71E7WFg3CVEVYHuoZt2UYbN/Q==
-              -----END PUBLIC KEY-----
-    type: multiline
-    default: |-
-      - name: allow
-        type: static
-        approve: true
-      - name: deny
-        type: static
-        approve: false
-      - name: dockerhub
-        type: notaryv1
-        trustRoots:
-          - name: default
-            key: |
-              -----BEGIN PUBLIC KEY-----
-              MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEOXYta5TgdCwXTCnLU09W5T4M4r9f
-              QQrqJuADP6U7g5r9ICgPSmZuRHP/1AYUfOQW3baveKsT969EfELKj1lfCA==
-              -----END PUBLIC KEY-----
-          - name: sse
-            key: |
-              -----BEGIN PUBLIC KEY-----
-              MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEsx28WV7BsQfnHF1kZmpdCTTLJaWe
-              d0CA+JOi8H4REuBaWSZ5zPDe468WuOJ6f71E7WFg3CVEVYHuoZt2UYbN/Q==
-              -----END PUBLIC KEY-----
-    required: true
-    group: "校验器"
+  logLevel: info
+  logFormat: json-pretty  # or json, for single line logging
+# alerting options: https://sse-secure-systems.github.io/connaisseur/latest/features/alerting/#configuration-options
+# alerting:
+#   clusterIdentifier: example-cluster-staging-europe # defaults to "not specified"
+#   admitRequest:
+#     receivers:
+#       # <template> needs to be chosen such that <template>.json matches one of the file names
+#       # in the ./alert_payload_templates directory
+#       - template: opsgenie #REQUIRED!
+#         receiverUrl: https://api.eu.opsgenie.com/v2/alerts #REQUIRED!
+#         priority: 4 #(defaults to 3)
+#         customHeaders: ["Authorization: GenieKey <Your-Genie-Key>"]
+#         payloadFields:
+#           responders:
+#             - username: "testuser@testcompany.de"
+#               type: user
+#           visibleTo:
+#             - username: "testuser@testcompany.de"
+#               type: user
+#           tags:
+#             - "deployed_an_image"
+#         failIfAlertSendingFails: True  # (defaults to False, turning it to True will make Connaisseur deny your
+#                                           # deployment (even in detection mode))
+#       - template: slack #REQUIRED!
+#         receiverUrl: https://hooks.slack.com/services/<Your-Slack-Hook-Path>
+#         priority: 1
+#   rejectRequest:
+#     receivers:
+#       - template: keybase  #REQUIRED!
+#         receiverUrl: https://bots.keybase.io/webhookbot/<Your-Keybase-Hook-Token>
+#         failIfAlertSendingFails: True
