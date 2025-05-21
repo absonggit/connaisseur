@@ -2,84 +2,31 @@ questions:
   # 日志配置
   - variable: application.logLevel
     label: "日志级别"
-    description: "设置日志详细程度"
     type: enum
-    default: info
     options:
       - info
       - warning
       - debug
       - error
+    default: info
     group: "日志配置"
 
   - variable: application.logFormat
     label: "日志格式"
-    description: "日志输出格式"
     type: enum
-    default: json-pretty
     options:
       - json-pretty
+      - json
       - plain
+    default: json-pretty
     group: "日志配置"
-
-  # 功能特性
-  - variable: application.features.automaticUnchangedApproval
-    label: "自动批准未变更镜像"
-    type: boolean
-    default: false
-    group: "功能特性"
-
-  - variable: application.features.automaticChildApproval
-    label: "自动批准子资源"
-    type: boolean
-    default: true
-    group: "功能特性"
-
-  - variable: application.features.detectionMode
-    label: "只警告不拒绝"
-    description: "启用后所有校验仅产生警告不拒绝部署"
-    type: boolean
-    default: false
-    group: "功能特性"
-
-  - variable: application.features.namespacedValidation.mode
-    label: "命名空间校验模式"
-    description: "选择是否只在特定命名空间校验"
-    type: enum
-    options:
-      - ignore
-      - validate
-    default: ignore
-    group: "功能特性"
-
-  - variable: application.features.resourceValidationMode
-    label: "资源校验范围"
-    description: "校验所有资源或仅校验 Pod"
-    type: enum
-    options:
-      - all
-      - podsOnly
-    default: all
-    group: "功能特性"
-
-  - variable: application.features.cache.expirySeconds
-    label: "缓存超时时间（秒）"
-    type: int
-    default: 30
-    group: "功能特性"
-
-  - variable: application.features.cache.cacheErrors
-    label: "缓存校验失败"
-    type: boolean
-    default: true
-    group: "功能特性"
 
   # 策略规则
   - variable: application.policy
-    label: "镜像策略规则"
-    description: |
-      镜像策略规则，按 YAML 数组格式编辑，示例已提供。每条规则 pattern 支持通配。
+    label: "策略规则"
     type: multiline
+    description: |
+      镜像策略规则，按 YAML 数组格式，每条 pattern 支持通配。请按实际业务需求做增删。 
     default: |-
       - pattern: "*:*"
         validator: deny
@@ -95,10 +42,10 @@ questions:
 
   # 校验器
   - variable: application.validators
-    label: "校验器设置"
-    description: |
-      支持 NotaryV1、Cosign 等校验方式，按 YAML 格式配置。示例为默认推荐配置。
+    label: "校验器"
     type: multiline
+    description: |
+      各镜像仓库的方法与密钥配置。NotaryV1/Cosign等方式默认已给出，按需调整。
     default: |-
       - name: allow
         type: static
@@ -122,3 +69,16 @@ questions:
               d0CA+JOi8H4REuBaWSZ5zPDe468WuOJ6f71E7WFg3CVEVYHuoZt2UYbN/Q==
               -----END PUBLIC KEY-----
     group: "校验器"
+
+  # 功能特性（举例，可继续扩展）
+  - variable: application.features.automaticUnchangedApproval
+    label: "自动批准未变更镜像"
+    type: boolean
+    default: false
+    group: "功能特性"
+
+  - variable: application.features.automaticChildApproval
+    label: "自动批准子资源"
+    type: boolean
+    default: true
+    group: "功能特性"
