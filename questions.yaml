@@ -81,6 +81,8 @@ questions:
     label: "校验器（validators）"
     description: 以 YAML 数组格式填写，可根据需要新增或删除校验器条目。
     type: multiline
+    attrs:
+      rows: 18
     required: true
     group: "校验器"
     default: |-
