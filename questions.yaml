@@ -1,7 +1,8 @@
 questions:
-  # 日志配置
+  # ---- 日志配置 ----
   - variable: application.logLevel
     label: "日志级别"
+    description: "日志详细程度（info/warning/debug/error）"
     type: enum
     options:
       - info
@@ -9,173 +10,107 @@ questions:
       - debug
       - error
     default: info
-    group: "日志配置"
+    group: "基础配置"
 
   - variable: application.logFormat
     label: "日志格式"
+    description: "日志输出格式，推荐 json-pretty"
     type: enum
     options:
       - json-pretty
       - json
       - plain
     default: json-pretty
-    group: "日志配置"
+    group: "基础配置"
 
-  # 校验器1：allow
-  - variable: application.validators[0].name
-    label: "第1个校验器名称"
-    type: string
-    default: allow
-    required: true
-    group: "校验器"
-
-  - variable: application.validators[0].type
-    label: "第1个校验器类型"
-    type: enum
-    options:
-      - static
-    default: static
-    required: true
-    group: "校验器"
-
-  - variable: application.validators[0].approve
-    label: "第1个校验器是否默认通过"
-    type: boolean
-    default: true
-    required: true
-    group: "校验器"
-
-  # 校验器2：deny
-  - variable: application.validators[1].name
-    label: "第2个校验器名称"
-    type: string
-    default: deny
-    required: true
-    group: "校验器"
-
-  - variable: application.validators[1].type
-    label: "第2个校验器类型"
-    type: enum
-    options:
-      - static
-    default: static
-    required: true
-    group: "校验器"
-
-  - variable: application.validators[1].approve
-    label: "第2个校验器是否默认通过"
+  # ---- 功能特性举例（可继续补充） ----
+  - variable: application.features.automaticUnchangedApproval
+    label: "自动批准未变更镜像"
+    description: "若镜像引用未发生变更则自动通过"
     type: boolean
     default: false
-    required: true
-    group: "校验器"
+    group: "功能特性"
 
-  # 校验器3：dockerhub
-  - variable: application.validators[2].name
-    label: "第3个校验器名称"
-    type: string
-    default: dockerhub
-    required: true
-    group: "校验器"
+  - variable: application.features.automaticChildApproval
+    label: "自动批准子资源"
+    description: "如由父资源触发的 pod"
+    type: boolean
+    default: true
+    group: "功能特性"
 
-  - variable: application.validators[2].type
-    label: "第3个校验器类型"
-    type: enum
-    options:
-      - notaryv1
-    default: notaryv1
+  # ---- 策略规则与校验器总配置（合并成一个文本框） ----
+  - variable: applicationConfigFull
+    label: "核心配置（校验器与策略规则, YAML，建议直接按默认模板修改）"
+    description: |
+      填写格式为完整YAML，涵盖 validators 和 policy 两项。如下示例：
+      ---
+      validators:
+        - name: allow
+          type: static
+          approve: true
+        - name: deny
+          type: static
+          approve: false
+        - name: dockerhub
+          type: notaryv1
+          trustRoots:
+            - name: default
+              key: |
+                -----BEGIN PUBLIC KEY-----
+                MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEOXYta5TgdCwXTCnLU09W5T4M4r9f
+                QQrqJuADP6U7g5r9ICgPSmZuRHP/1AYUfOQW3baveKsT969EfELKj1lfCA==
+                -----END PUBLIC KEY-----
+            - name: sse
+              key: |
+                -----BEGIN PUBLIC KEY-----
+                MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEsx28WV7BsQfnHF1kZmpdCTTLJaWe
+                d0CA+JOi8H4REuBaWSZ5zPDe468WuOJ6f71E7WFg3CVEVYHuoZt2UYbN/Q==
+                -----END PUBLIC KEY-----
+      policy:
+        - pattern: "*:*"
+          validator: deny
+        - pattern: "docker.io/library/*:*"
+          validator: dockerhub
+        - pattern: "docker.io/securesystemsengineering/*:*"
+          validator: dockerhub
+          with:
+            trustRoot: sse
+        - pattern: "registry.k8s.io/*:*"
+          validator: allow
+    type: multiline
     required: true
-    group: "校验器"
-
-  - variable: application.validators[2].trustRoots[0].name
-    label: "dockerhub默认信任根名称"
-    type: string
-    default: default
-    required: true
-    group: "校验器"
-
-  - variable: application.validators[2].trustRoots[0].key
-    label: "dockerhub默认信任根公钥"
-    type: string
     default: |-
-      -----BEGIN PUBLIC KEY-----
-      MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEOXYta5TgdCwXTCnLU09W5T4M4r9f
-      QQrqJuADP6U7g5r9ICgPSmZuRHP/1AYUfOQW3baveKsT969EfELKj1lfCA==
-      -----END PUBLIC KEY-----
-    required: true
-    group: "校验器"
-
-  - variable: application.validators[2].trustRoots[1].name
-    label: "dockerhub备用信任根名称"
-    type: string
-    default: sse
-    required: true
-    group: "校验器"
-
-  - variable: application.validators[2].trustRoots[1].key
-    label: "dockerhub备用信任根公钥"
-    type: string
-    default: |-
-      -----BEGIN PUBLIC KEY-----
-      MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEsx28WV7BsQfnHF1kZmpdCTTLJaWe
-      d0CA+JOi8H4REuBaWSZ5zPDe468WuOJ6f71E7WFg3CVEVYHuoZt2UYbN/Q==
-      -----END PUBLIC KEY-----
-    required: true
-    group: "校验器"
-
-  # 策略规则1
-  - variable: application.policy[0].pattern
-    label: "第1条策略匹配模式"
-    type: string
-    default: "*:*"
-    group: "策略规则"
-
-  - variable: application.policy[0].validator
-    label: "第1条策略绑定校验器"
-    type: string
-    default: deny
-    group: "策略规则"
-
-  # 策略规则2
-  - variable: application.policy[1].pattern
-    label: "第2条策略匹配模式"
-    type: string
-    default: "docker.io/library/*:*"
-    group: "策略规则"
-
-  - variable: application.policy[1].validator
-    label: "第2条策略绑定校验器"
-    type: string
-    default: dockerhub
-    group: "策略规则"
-
-  # 策略规则3
-  - variable: application.policy[2].pattern
-    label: "第3条策略匹配模式"
-    type: string
-    default: "docker.io/securesystemsengineering/*:*"
-    group: "策略规则"
-
-  - variable: application.policy[2].validator
-    label: "第3条策略绑定校验器"
-    type: string
-    default: dockerhub
-    group: "策略规则"
-
-  - variable: application.policy[2].with.trustRoot
-    label: "第3条策略信任根"
-    type: string
-    default: sse
-    group: "策略规则"
-
-  # 策略规则4
-  - variable: application.policy[3].pattern
-    label: "第4条策略匹配模式"
-    type: string
-    default: "registry.k8s.io/*:*"
-    group: "策略规则"
-
-  - variable: application.policy[3].validator
-    label: "第4条策略绑定校验器"
-    type: string
-    default: allow
-    group: "策略规则"
+      validators:
+        - name: allow
+          type: static
+          approve: true
+        - name: deny
+          type: static
+          approve: false
+        - name: dockerhub
+          type: notaryv1
+          trustRoots:
+            - name: default
+              key: |
+                -----BEGIN PUBLIC KEY-----
+                MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEOXYta5TgdCwXTCnLU09W5T4M4r9f
+                QQrqJuADP6U7g5r9ICgPSmZuRHP/1AYUfOQW3baveKsT969EfELKj1lfCA==
+                -----END PUBLIC KEY-----
+            - name: sse
+              key: |
+                -----BEGIN PUBLIC KEY-----
+                MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEsx28WV7BsQfnHF1kZmpdCTTLJaWe
+                d0CA+JOi8H4REuBaWSZ5zPDe468WuOJ6f71E7WFg3CVEVYHuoZt2UYbN/Q==
+                -----END PUBLIC KEY-----
+      policy:
+        - pattern: "*:*"
+          validator: deny
+        - pattern: "docker.io/library/*:*"
+          validator: dockerhub
+        - pattern: "docker.io/securesystemsengineering/*:*"
+          validator: dockerhub
+          with:
+            trustRoot: sse
+        - pattern: "registry.k8s.io/*:*"
+          validator: allow
+    group: "核心策略"
