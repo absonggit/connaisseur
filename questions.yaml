@@ -76,17 +76,3 @@ questions:
     type: boolean
     default: true
     group: "功能特性"
-    
-
-  - variable: application.policy
-    label: "规则"
-    description: "以 YAML 数组格式填写"
-    type: multiline
-    default: "策略"
-    group: "策略"
-  - variable: application.validators
-    label: "验证器"
-    description: "以 YAML 数组格式填写"
-    type: multiline
-    default: "验证器"
-    group: "策略"
