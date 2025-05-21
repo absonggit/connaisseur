@@ -77,30 +77,13 @@ questions:
     default: true
     group: "功能特性"
     
-  - variable: application.validators
-    label: "校验器（validators）"
-    description: 以 YAML 数组格式填写，可根据需要新增或删除校验器条目。
-    type: multiline
-    attrs:
-      rows: 18
-    required: true
-    group: "校验器"
-    default: |-
-      - name: allow
-        type: static
-        approve: true
-      - name: deny
-        type: static
-        approve: false
 
   - variable: application.policy
-    label: "策略规则（policy）"
-    description: 以 YAML 数组格式编辑。可任意新增或删除策略条目。
+    label: "策略规则"
+    description: "以 YAML 数组格式填写"
     type: multiline
-    required: true
-    group: "策略规则"
     default: |-
       - pattern: "*:*"
-        validator: deny
-      - pattern: "registry.k8s.io/*:*"
-        validator: allow
+      validator: deny
+    group: "策略规则"
+   
