@@ -82,8 +82,9 @@ questions:
     label: "策略规则"
     description: "以 YAML 数组格式填写"
     type: multiline
-    default: |-
-      - pattern: "*:*"
-        validator: deny
     group: "策略规则"
-   
+  - variable: application.validators
+    label: "验证器"
+    description: "以 YAML 数组格式填写"
+    type: multiline
+    group: "验证器"
