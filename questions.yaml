@@ -1,42 +1,97 @@
 questions:
-- variable: application.logLevel
-  label: "日志级别"
-  description: "设置 Connaisseur 的日志详细程度"
-  required: true
-  type: enum
-  options:
-    - info
-    - warning
-    - debug
-    - error
+  # 日志配置
+  - variable: application.logLevel
+    label: "日志级别"
+    description: "设置日志详细程度"
+    type: enum
+    default: info
+    options:
+      - info
+      - warning
+      - debug
+      - error
+    group: "日志配置"
 
-- variable: application.logFormat
-  label: "日志格式"
-  description: "日志输出格式"
-  required: true
-  type: enum
-  options:
-    - json-pretty
-    - plain
+  - variable: application.logFormat
+    label: "日志格式"
+    description: "日志输出格式"
+    type: enum
+    default: json-pretty
+    options:
+      - json-pretty
+      - json
+      - plain
+    group: "日志配置"
 
-- variable: application.features.automaticChildApproval
-  label: "自动批准子资源"
-  description: "是否自动批准子资源"
-  required: true
-  type: boolean
+  # 功能特性
+  - variable: application.features.automaticUnchangedApproval
+    label: "自动批准未变更镜像"
+    type: boolean
+    default: false
+    group: "功能特性"
 
-- variable: application.features.cache.expirySeconds
-  label: "镜像签名校验缓存超时时间（秒）"
-  description: "缓存校验结果的分钟数，减少重复验证。通常推荐 30-300 秒。"
-  type: int
-  required: true
-  default: 30
-  group: "缓存设置"
+  - variable: application.features.automaticChildApproval
+    label: "自动批准子资源"
+    type: boolean
+    default: true
+    group: "功能特性"
 
-- variable: application.features.cache.cacheErrors
-  label: "是否缓存校验失败"
-  description: "勾选后，镜像校验失败的结果也会被缓存，有助于减少无用流量。"
-  type: boolean
-  required: true
-  default: true
-  group: "缓存设置"
+  - variable: application.features.detectionMode
+    label: "只警告不拒绝"
+    description: "启用后所有校验仅产生警告不拒绝部署"
+    type: boolean
+    default: false
+    group: "功能特性"
+
+  - variable: application.features.namespacedValidation.mode
+    label: "命名空间校验模式"
+    description: "选择是否只在特定命名空间校验"
+    type: enum
+    options:
+      - ignore
+      - validate
+    default: ignore
+    group: "功能特性"
+
+  - variable: application.features.resourceValidationMode
+    label: "资源校验范围"
+    description: "校验所有资源或仅校验 Pod"
+    type: enum
+    options:
+      - all
+      - podsOnly
+    default: all
+    group: "功能特性"
+
+  - variable: application.features.cache.expirySeconds
+    label: "缓存超时时间（秒）"
+    type: int
+    default: 30
+    group: "功能特性"
+
+  - variable: application.features.cache.cacheErrors
+    label: "缓存校验失败"
+    type: boolean
+    default: true
+    group: "功能特性"
+
+  # 策略规则
+  - variable: application.policy
+    label: "镜像策略规则"
+    description: |
+      镜像策略规则，通过 YAML 数组编辑，可根据业务需要调整。
+      例:
+        - pattern: "*:*"
+          validator: deny
+        - pattern: "docker.io/library/*:*"
+          validator: dockerhub
+    type: multiline
+    group: "策略规则"
+
+  # 校验器
+  - variable: application.validators
+    label: "校验器设置"
+    description: |
+      校验器配置，支持 NotaryV1、Cosign 等。复杂结构建议 YAML 编辑。
+    type: multiline
+    group: "校验器"
